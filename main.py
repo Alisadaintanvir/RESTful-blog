@@ -58,7 +58,7 @@ def edit_post(index):
     if request.method == 'POST' and form.validate_on_submit():
         form.populate_obj(post)
         db.session.commit()
-        return redirect(url_for('get_all_posts'))
+        return redirect(url_for('show_post', index=post.id))
     return render_template('make-post.html', form=form)
 
 
