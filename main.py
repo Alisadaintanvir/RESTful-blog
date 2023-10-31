@@ -6,6 +6,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
+from send_mail import Email
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6nzWlSihBXox7C0sKR6b'
@@ -51,17 +52,6 @@ def show_post(index):
     return render_template("post.html", post=requested_post)
 
 
-@app.route('/edit_post/<int:index>', methods=['GET', 'POST'])
-def edit_post(index):
-    post = BlogPost.query.get(index)
-    form = CreatePostForm(obj=post)
-    if request.method == 'POST' and form.validate_on_submit():
-        form.populate_obj(post)
-        db.session.commit()
-        return redirect(url_for('show_post', index=post.id))
-    return render_template('make-post.html', form=form)
-
-
 @app.route('/new-post', methods=['GET', 'POST'])
 def new_post():
     form = CreatePostForm()
@@ -80,6 +70,17 @@ def new_post():
     return render_template('make-post.html', form=form)
 
 
+@app.route('/edit_post/<int:index>', methods=['GET', 'POST'])
+def edit_post(index):
+    post = BlogPost.query.get(index)
+    form = CreatePostForm(obj=post)
+    if request.method == 'POST' and form.validate_on_submit():
+        form.populate_obj(post)
+        db.session.commit()
+        return redirect(url_for('show_post', index=post.id))
+    return render_template('make-post.html', form=form)
+
+
 @app.route('/delete-post')
 def delete_post():
     index = request.args.get('id')
@@ -95,8 +96,15 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
+    if request.method == "POST":
+        name = request.form['name']
+        email = request.form['email']
+        phone_number = request.form['number']
+        message = request.form['message']
+        email_msg = Email(name, email, phone_number, message)
+        email_msg.send_email()
     return render_template("contact.html")
 
 
