@@ -80,6 +80,16 @@ def new_post():
     return render_template('make-post.html', form=form)
 
 
+@app.route('/delete-post')
+def delete_post():
+    index = request.args.get('id')
+    post_to_delete = BlogPost.query.get(index)
+    if post_to_delete:
+        db.session.delete(post_to_delete)
+        db.session.commit()
+    return redirect(url_for('get_all_posts'))
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
